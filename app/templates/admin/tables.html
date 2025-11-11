@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Mesas - Admin{% endblock %}
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">Gerenciar Mesas</h1>
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar
+            </a>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTableModal">
+                <i class="fas fa-plus me-2"></i> Adicionar Mesa
+            </button>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for table in tables %}
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+            <div class="card text-center h-100">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <i class="fas fa-table display-4 mb-3 text-{{ 'success' if table.status == 'livre' else 'danger' }}"></i>
+                    <h3 class="h5">Mesa {{ table.number }}</h3>
+                    <p class="text-muted small mb-2">Capacidade: {{ table.capacity }}</p>
+                    <span class="badge rounded-pill text-bg-{{ 'success' if table.status == 'livre' else 'danger' }}">
+                        {{ table.status|title }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal Adicionar Mesa -->
+<div class="modal fade" id="addTableModal" tabindex="-1" aria-labelledby="addTableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.add_table') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTableModalLabel">Adicionar Nova Mesa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Número da Mesa</label>
+                        <input type="number" class="form-control" name="number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacidade</label>
+                        <input type="number" class="form-control" name="capacity" value="4" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

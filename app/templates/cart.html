@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Carrinho - Meatz Burger{% endblock %}
+{% block extra_css %}
+<style>
+    .cart-section {
+        padding: 4rem 0;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="cart-section">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="mb-0">Meu Carrinho</h1>
+            <a href="{{ url_for('main.menu') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-plus me-2"></i> Adicionar mais itens
+            </a>
+        </div>
+
+        {% if items %}
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Produto</th>
+                                <th scope="col">Preço</th>
+                                <th scope="col">Quantidade</th>
+                                <th scope="col">Subtotal</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="{{ item.product.image_url or 'https://img-wrapper.vercel.app/image?url=https://placehold.co/80x80' }}" alt="{{ item.product.name }}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 0.5rem; margin-right: 1rem;">
+                                        <div>
+                                            <h6 class="mb-0">{{ item.product.name }}</h6>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>R$ {{ "%.2f"|format(item.product.price) }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td><strong>R$ {{ "%.2f"|format(item.subtotal) }}</strong></td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="removeItem({{ item.product.id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <div class="fs-5">
+                    <strong>Total:</strong>
+                    <span class="text-primary-emphasis">R$ {{ "%.2f"|format(total) }}</span>
+                </div>
+                <a href="{{ url_for('main.checkout') }}" class="btn btn-primary btn-lg">
+                    Finalizar Pedido <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart display-1 text-light mb-4"></i>
+            <h3>Seu carrinho está vazio.</h3>
+            <p class="text-muted">Adicione alguns hambúrgueres deliciosos para começar.</p>
+            <a href="{{ url_for('main.menu') }}" class="btn btn-primary mt-3">Ver Cardápio</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function removeItem(productId) {
+    fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({product_id: productId})
+    })
+    .then(response => {
+        if (response.ok) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

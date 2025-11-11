@@ -1,0 +1,117 @@
+🍽️ Funcionalidades para o Garçom (Atendimento de Mesa)
+
+Comanda Digital (Tablet ou Smartphone)
+
+Abertura e fechamento de mesas com um toque.
+
+Adição e exclusão rápida de itens.
+
+Opções de observações (“sem cebola”, “mal passado”, etc.).
+
+Visualização de status do pedido (ex: “em preparo”, “pronto”, “entregue”).
+
+Modo Offline / Sincronização Automática
+
+Permite anotar pedidos mesmo se o Wi-Fi cair, sincronizando depois.
+
+Divisão de Contas Inteligente
+
+Divide conta por pessoa, item ou percentual.
+
+Permite transferir itens entre mesas facilmente.
+
+Sugestões e Upselling Automatizado
+
+O sistema recomenda acompanhamentos ou bebidas com base no pedido.
+
+Exemplo: “Cliente pediu pizza → sugerir vinho ou sobremesa.”
+
+Notificações Instantâneas
+
+Avisos vibratórios ou sonoros quando o prato fica pronto.
+
+Mensagens rápidas entre garçom e cozinha (“mesa 4 pediu mais molho”).
+
+🔥 Funcionalidades para a Cozinha
+
+Painel de Pedidos em Tempo Real
+
+Tela grande exibindo todos os pedidos, com cores por prioridade:
+
+🟢 Novo | 🟡 Em preparo | 🔴 Atrasado | ⚪ Finalizado.
+
+Filtragem por setor (chapa, saladas, bebidas, sobremesas).
+
+Controle de Tempo e Desempenho
+
+Mostra o tempo médio de preparo por prato e por cozinheiro.
+
+Alertas automáticos se o pedido ultrapassar o tempo padrão.
+
+Ticket de Produção Personalizável
+
+Impressão (ou exibição) com observações do cliente, mesa, e garçom responsável.
+
+Códigos QR para confirmar preparo e entrega.
+
+Modo Silencioso com Feedback Visual
+
+Em vez de gritos, o garçom recebe no app: “Prato da mesa 8 pronto 🚀”.
+
+💰 Funcionalidades de PDV (Caixa e Gestão)
+
+Integração Total com Comandas
+
+O caixa vê o que foi consumido em tempo real, sem depender do garçom.
+
+Pagamentos Inteligentes
+
+Pix, cartão, dinheiro, carteira digital — com troco automático calculado.
+
+Possibilidade de “pagar metade agora, metade depois”.
+
+Controle de Estoque Automático
+
+Dá baixa automática nos ingredientes conforme os pedidos.
+
+Alerta de estoque baixo com previsão de consumo.
+
+Relatórios e Análises Avançadas
+
+Relatórios por hora, dia, garçom, produto ou categoria.
+
+Identifica produtos mais vendidos, gargalos e desperdícios.
+
+Módulo de Fidelidade e Cashback
+
+Pontos por consumo, QR code para clientes, e promoções automatizadas.
+
+⚙️ Funcionalidades Extras (Gestão e Eficiência)
+
+Dashboard Gerencial em Tempo Real
+
+Visão geral: pedidos em andamento, faturamento do dia, desempenho da equipe.
+
+Modo Entrega & Retirada
+
+Integração com delivery e takeaway, tudo no mesmo fluxo.
+
+Controle de Acesso por Nível
+
+Garçom, cozinha, gerente e administrador têm permissões diferentes.
+
+Integração com Impressoras e Displays
+
+Compatível com impressoras térmicas e monitores de cozinha.
+
+Modo Treinamento
+
+Simulação de pedidos para treinar novos funcionários sem impactar o sistema real.
+
+💡 Diferenciais Inovadores
+
+Reconhecimento de voz: garçom dita o pedido (“Mesa 5, dois hambúrgueres sem cebola e uma coca”) e o sistema transcreve automaticamente.
+
+Modo “rush” automático: sistema detecta pico de pedidos e ajusta prioridades da cozinha.
+
+Análise preditiva: sugere o que preparar antes de o pedido chegar, com base em histórico e hora do dia.

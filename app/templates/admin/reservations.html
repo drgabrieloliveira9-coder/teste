@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Reservas - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Dashboard
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2>Reservas de Mesas</h2>
+            <p class="text-muted">Gerencie reservas e lista de espera</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newReservationModal">
+                + Nova Reserva
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Reservas para Hoje</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Cliente</th>
+                        <th>Telefone</th>
+                        <th>Pessoas</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reservation in reservations %}
+                    <tr>
+                        <td>{{ reservation.reservation_time }}</td>
+                        <td>{{ reservation.customer_name }}</td>
+                        <td>{{ reservation.customer_phone }}</td>
+                        <td>{{ reservation.party_size }}</td>
+                        <td>
+                            {% if reservation.status == 'confirmed' %}
+                            <span class="badge bg-success">Confirmada</span>
+                            {% elif reservation.status == 'pending' %}
+                            <span class="badge bg-warning">Pendente</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ reservation.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if reservation.status == 'pending' %}
+                            <form method="POST" action="{{ url_for('admin.confirm_reservation', id=reservation.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="col-md-4">
+            <h4>Fila de Espera</h4>
+            <div class="list-group">
+                {% for entry in waitlist %}
+                <div class="list-group-item">
+                    <h6>{{ entry.customer_name }}</h6>
+                    <small>{{ entry.party_size }} pessoas - {{ entry.customer_phone }}</small>
+                    <br>
+                    <small class="text-muted">Chegou às {{ entry.created_at }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="newReservationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.create_reservation') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nova Reserva</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Cliente</label>
+                        <input type="text" class="form-control" name="customer_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" name="customer_phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">E-mail</label>
+                        <input type="email" class="form-control" name="customer_email">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Número de Pessoas</label>
+                        <input type="number" class="form-control" name="party_size" min="1" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Data</label>
+                            <input type="date" class="form-control" name="reservation_date" value="{{ today }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Horário</label>
+                            <input type="time" class="form-control" name="reservation_time" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Mesa (opcional)</label>
+                        <select class="form-select" name="table_id">
+                            <option value="">Atribuir depois</option>
+                            {% for table in tables %}
+                            <option value="{{ table.id }}">Mesa {{ table.number }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Observações</label>
+                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

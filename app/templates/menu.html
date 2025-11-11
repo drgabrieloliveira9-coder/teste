@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Cardápio - Meatz Burger{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-header {
+        background: var(--dark-brown);
+        padding: 4rem 0;
+        color: white;
+        text-align: center;
+    }
+    
+    .menu-header h1 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 900;
+        font-size: 3rem;
+        color: white;
+    }
+    
+    .category-filter {
+        padding: 2rem 0;
+        position: sticky;
+        top: 80px; /* Height of navbar */
+        background: var(--background-cream);
+        z-index: 10;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .filter-btn {
+        margin: 0.25rem;
+        border: 2px solid var(--border-color);
+        background: var(--white);
+        color: var(--text-dark);
+        transition: all 0.3s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+        background: var(--dark-brown);
+        color: white;
+        border-color: var(--dark-brown);
+    }
+    
+    .product-grid {
+        margin-top: 3rem;
+    }
+
+    .product-card {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    .product-card img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 1rem;
+        margin-right: 1.5rem;
+    }
+    .product-card .card-body {
+        padding: 0;
+        flex: 1;
+    }
+    .product-card .product-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .product-card .product-description {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+    .product-card .product-price {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    .product-card .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .category-title {
+        margin-top: 3rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--primary-color);
+        display: inline-block;
+    }
+
+    @media (max-width: 576px) {
+        .product-card {
+            flex-direction: column;
+            text-align: center;
+        }
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            margin-right: 0;
+            margin-bottom: 1rem;
+        }
+        .product-card .card-body {
+            padding: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="menu-header">
+    <div class="container">
+        <h1>Nosso Cardápio</h1>
+        <p class="lead">Sabores irresistíveis que vão te conquistar</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="category-filter text-center">
+        <button class="btn filter-btn active" data-category="all">Todos</button>
+        {% for category in categories %}
+        <a href="#category-{{ category.id }}" class="btn filter-btn" data-category="{{ category.id }}">{{ category.name }}</a>
+        {% endfor %}
+    </div>
+    
+    <div class="product-grid">
+        {% for category in categories %}
+            <div id="category-{{ category.id }}" class="category-section" data-category-id="{{ category.id }}">
+                <h2 class="category-title">{{ category.name }}</h2>
+                {% for product in products %}
+                    {% if product.category_id == category.id %}
+                    <div class="card product-card" data-category="{{ product.category_id }}">
+                        <img src="{{ product.image_url or 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400' }}" 
+                             alt="{{ product.name }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="product-name">{{ product.name }}</h5>
+                                    <p class="product-description">{{ product.description }}</p>
+                                </div>
+                                <div class="text-end ms-3">
+                                    <span class="product-price d-block mb-2">R$ {{ "%.2f"|format(product.price) }}</span>
+                                    <button class="btn btn-primary add-to-cart" data-id="{{ product.id }}">
+                                        <i class="fas fa-cart-plus"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="cartToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto"><i class="fas fa-check-circle text-success me-2"></i>Sucesso</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Produto adicionado ao carrinho!
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cartToastEl = document.getElementById('cartToast');
+    const cartToast = new bootstrap.Toast(cartToastEl);
+
+    document.querySelectorAll('.add-to-cart').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const productId = this.dataset.id;
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({product_id: productId, quantity: 1})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if(data.success) {
+                    cartToast.show();
+                    updateCartCount();
+                }
+            });
+        });
+    });
+
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const categorySections = document.querySelectorAll('.category-section');
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            filterButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+
+            if (category === 'all') {
+                categorySections.forEach(section => section.style.display = 'block');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                categorySections.forEach(section => {
+                    if (section.dataset.categoryId === category) {
+                        section.style.display = 'block';
+                        const target = document.getElementById(`category-${category}`);
+                        if (target) {
+                            const offset = 100; // Account for sticky nav
+                            const bodyRect = document.body.getBoundingClientRect().top;
+                            const elementRect = target.getBoundingClientRect().top;
+                            const elementPosition = elementRect - bodyRect;
+                            const offsetPosition = elementPosition - offset;
+
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
+                        }
+                    } else {
+                        section.style.display = 'none';
+                    }
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Operações de Caixa - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Dashboard
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2>Sangrias e Suprimentos</h2>
+            <p class="text-muted">Controle de operações de caixa - Hoje: {{ today }}</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5>Total Sangrias</h5>
+                    <h3>R$ {{ "%.2f"|format(total_sangria) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Total Suprimentos</h5>
+                    <h3>R$ {{ "%.2f"|format(total_suprimento) }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Diferença</h5>
+                    <h3>R$ {{ "%.2f"|format(total_suprimento - total_sangria) }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#sangriaModal">
+                Registrar Sangria
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#suprimentoModal">
+                Registrar Suprimento
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h4>Histórico de Operações</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Motivo</th>
+                        <th>Operador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for op in operations %}
+                    <tr>
+                        <td>{{ op.created_at }}</td>
+                        <td>
+                            {% if op.type == 'sangria' %}
+                            <span class="badge bg-danger">Sangria</span>
+                            {% else %}
+                            <span class="badge bg-success">Suprimento</span>
+                            {% endif %}
+                        </td>
+                        <td>R$ {{ "%.2f"|format(op.amount) }}</td>
+                        <td>{{ op.reason or '-' }}</td>
+                        <td>{{ op.username }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="sangriaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.add_cash_operation') }}">
+                <input type="hidden" name="type" value="sangria">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Registrar Sangria</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Valor</label>
+                        <input type="number" step="0.01" class="form-control" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motivo</label>
+                        <textarea class="form-control" name="reason" rows="2" placeholder="Ex: Pagamento fornecedor"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Registrar Sangria</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="suprimentoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.add_cash_operation') }}">
+                <input type="hidden" name="type" value="suprimento">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Registrar Suprimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Valor</label>
+                        <input type="number" step="0.01" class="form-control" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motivo</label>
+                        <textarea class="form-control" name="reason" rows="2" placeholder="Ex: Troco"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Registrar Suprimento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

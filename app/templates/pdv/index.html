@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}PDV - Meatz Burger{% endblock %}
+{% block extra_css %}
+<style>
+    .pdv-container {
+        padding: 3rem 0;
+    }
+    .pdv-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        text-decoration: none;
+        color: var(--text-dark);
+        border-radius: 1rem;
+        background: var(--white);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.07);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .pdv-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.1);
+        color: var(--primary-hover);
+    }
+    .pdv-card i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        transition: color 0.3s ease;
+    }
+    .pdv-card:hover i {
+        color: var(--primary-hover);
+    }
+    .pdv-card h5 {
+        font-size: 1.25rem;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container pdv-container">
+    <div class="text-center mb-5">
+        <h1 class="display-5">Ponto de Venda (PDV)</h1>
+        <p class="lead text-muted">Selecione uma opção para começar</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+        <div class="col-lg-3 col-md-6">
+            <a href="{{ url_for('pdv.floor_map') }}" class="pdv-card">
+                <i class="fas fa-map-signs"></i>
+                <h5>Mapa do Salão</h5>
+                <p class="small text-muted">Gerencie mesas e pedidos do salão.</p>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <a href="{{ url_for('pdv.kds') }}" class="pdv-card">
+                <i class="fas fa-tv"></i>
+                <h5>Tela da Cozinha (KDS)</h5>
+                <p class="small text-muted">Acompanhe os pedidos em preparação.</p>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <a href="{{ url_for('pdv.cashier') }}" class="pdv-card">
+                <i class="fas fa-cash-register"></i>
+                <h5>Caixa</h5>
+                <p class="small text-muted">Veja o resumo de vendas do dia.</p>
+            </a>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <a href="{{ url_for('admin.dashboard') }}" class="pdv-card">
+                <i class="fas fa-chart-line"></i>
+                <h5>Painel Admin</h5>
+                <p class="small text-muted">Acesse o dashboard administrativo.</p>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

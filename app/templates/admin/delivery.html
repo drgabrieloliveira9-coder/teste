@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Delivery - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Dashboard
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2>Gestão de Delivery</h2>
+            <p class="text-muted">Controle de entregadores e pedidos</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newDriverModal">
+                + Cadastrar Entregador
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <h4>Entregadores Ativos</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Telefone</th>
+                        <th>Veículo</th>
+                        <th>Placa</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for driver in drivers %}
+                    <tr>
+                        <td>{{ driver.name }}</td>
+                        <td>{{ driver.phone }}</td>
+                        <td>{{ driver.vehicle_type or 'N/A' }}</td>
+                        <td>{{ driver.license_plate or 'N/A' }}</td>
+                        <td>
+                            {% if driver.active %}
+                            <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="newDriverModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.add_driver') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cadastrar Entregador</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telefone</label>
+                        <input type="tel" class="form-control" name="phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo de Veículo</label>
+                        <select class="form-select" name="vehicle_type">
+                            <option value="moto">Moto</option>
+                            <option value="carro">Carro</option>
+                            <option value="bicicleta">Bicicleta</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Placa</label>
+                        <input type="text" class="form-control" name="license_plate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

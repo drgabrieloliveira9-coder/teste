@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: meatz-burger
+    runtime: python
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: gunicorn -c gunicorn_config.py run:app
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_DEFAULT_PASSWORD
+        value: MudeEstaSenha123!
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /
+    disk:
+      name: meatz-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

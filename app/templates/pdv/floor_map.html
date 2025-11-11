@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Mapa do Salão - PDV{% endblock %}
+{% block extra_css %}
+<style>
+    .table-card {
+        width: 180px;
+        height: 180px;
+        cursor: pointer;
+        user-select: none;
+        border: 3px solid transparent;
+        transition: all 0.2s ease;
+    }
+    .table-card.selected {
+        border-color: var(--primary-color);
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(233, 152, 86, 0.3);
+    }
+    .table-card .card-body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .table-card .table-number {
+        font-size: 2rem;
+        font-weight: 800;
+    }
+    .table-card .table-status {
+        font-size: 0.8rem;
+    }
+    .table-card .table-order-info {
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">Mapa do Salão</h1>
+        <div>
+            <a href="{{ url_for('pdv.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Voltar</a>
+            <button class="btn btn-secondary" onclick="clearSelection()"><i class="fas fa-times me-2"></i>Limpar Seleção</button>
+            <button class="btn btn-primary" onclick="mergeSelectedTables()"><i class="fas fa-compress-arrows-alt me-2"></i>Juntar Mesas</button>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-4">
+        {% for table in tables %}
+        <div class="card table-card" id="table-{{ table.id }}" data-table-id="{{ table.id }}" onclick="handleTableClick({{ table.id }}, '{{ table.status }}')">
+            <div class="card-body bg-{{ 'success' if table.status == 'livre' else 'warning' if table.status == 'ocupada' else 'info' }}-subtle">
+                <div class="table-number">{{ table.number }}</div>
+                <div class="table-status badge rounded-pill text-bg-{{ 'success' if table.status == 'livre' else 'warning' if table.status == 'ocupada' else 'info' }}">{{ table.status|upper }}</div>
+                {% if table.order %}
+                <div class="table-order-info mt-2">
+                    #{{ table.order.id }} - R$ {{ "%.2f"|format(table.order.total) }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal de Ações -->
+<div class="modal fade" id="tableActionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tableActionModalTitle">Mesa X</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center" id="tableActionModalBody">
+                <!-- Botões serão injetados aqui -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedTables = new Set();
+let currentTableId = null;
+const tableActionModal = new bootstrap.Modal(document.getElementById('tableActionModal'));
+
+function handleTableClick(tableId, status) {
+    if (selectedTables.size > 0) {
+        toggleSelection(tableId);
+    } else {
+        showActions(tableId, status);
+    }
+}
+
+function showActions(tableId, status) {
+    currentTableId = tableId;
+    const modalTitle = document.getElementById('tableActionModalTitle');
+    const modalBody = document.getElementById('tableActionModalBody');
+    
+    modalTitle.textContent = `Ações para Mesa ${document.querySelector('#table-' + tableId + ' .table-number').textContent}`;
+    
+    let actionsHtml = `<div class="d-grid gap-2">`;
+    if (status === 'livre') {
+        actionsHtml += `<button class="btn btn-lg btn-success" onclick="openTable()">Abrir Mesa</button>`;
+    } else if (status === 'ocupada') {
+        actionsHtml += `<a href="/pdv/mesa/${tableId}" class="btn btn-lg btn-primary">Ver/Adicionar Pedido</a>`;
+        actionsHtml += `<button class="btn btn-lg btn-danger" onclick="closeTable()">Fechar Mesa</button>`;
+    }
+    actionsHtml += `<button class="btn btn-lg btn-outline-secondary" onclick="toggleSelection(${tableId}); tableActionModal.hide();">Selecionar para Juntar</button>`;
+    actionsHtml += `</div>`;
+    
+    modalBody.innerHTML = actionsHtml;
+    tableActionModal.show();
+}
+
+function toggleSelection(tableId) {
+    const card = document.getElementById('table-' + tableId);
+    if (selectedTables.has(tableId)) {
+        selectedTables.delete(tableId);
+        card.classList.remove('selected');
+    } else {
+        selectedTables.add(tableId);
+        card.classList.add('selected');
+    }
+}
+
+function clearSelection() {
+    selectedTables.forEach(id => {
+        document.getElementById('table-' + id).classList.remove('selected');
+    });
+    selectedTables.clear();
+}
+
+function mergeSelectedTables() {
+    if (selectedTables.size < 2) {
+        alert('Selecione pelo menos 2 mesas para juntar.');
+        return;
+    }
+    
+    fetch('/pdv/api/mesas/juntar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({table_ids: Array.from(selectedTables)})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Mesas juntadas com sucesso!');
+            location.reload();
+        } else {
+            alert('Erro: ' + (data.error || 'Não foi possível juntar as mesas.'));
+        }
+    });
+}
+
+function openTable() {
+    if (!currentTableId) return;
+    fetch(`/pdv/api/mesas/${currentTableId}/abrir`, { method: 'POST' })
+    .then(r => r.json()).then(data => {
+        if(data.success) location.href = `/pdv/mesa/${currentTableId}`;
+        else alert('Erro: ' + data.error);
+    });
+}
+
+function closeTable() {
+    if (!currentTableId || !confirm('Deseja fechar esta mesa? Apenas mesas com pedidos pagos podem ser fechadas.')) return;
+    fetch(`/pdv/api/mesas/${currentTableId}/fechar`, { method: 'POST' })
+    .then(r => r.json()).then(data => {
+        if(data.success) location.reload();
+        else alert('Erro: ' + data.error);
+    });
+}
+</script>
+{% endblock %}

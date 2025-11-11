@@ -1,0 +1,240 @@
+🧾 1. MÓDULO DE COMANDA / GARÇOM (ATENDIMENTO DE MESA)
+🔹 Abertura e Gestão de Mesas
+
+Criação de mesas com nome ou número personalizado.
+
+Juntar/dividir mesas.
+
+Transferência de comandas entre garçons.
+
+Visualização de mapa do salão (layout com mesas ocupadas/livres).
+
+🔹 Pedido Digital
+
+Adicionar itens com fotos, descrições e modificadores (ex: ponto da carne, trocas, adicionais).
+
+Observações personalizadas por item (“sem gelo”, “extra queijo”).
+
+Edição e exclusão de itens antes do envio à cozinha.
+
+Envio direto à cozinha sem precisar ir ao caixa.
+
+Pedidos divididos por categoria (cozinha, bar, sobremesa etc.).
+
+Duplicar comanda / repetir pedido anterior.
+
+🔹 Controle de Status
+
+Visualização do status de cada item:
+
+“Em preparo”
+
+“Pronto para retirada”
+
+“Entregue”
+
+“Cancelado”
+
+Alertas automáticos quando um item atrasa.
+
+🔹 Comunicação e Notificações
+
+Mensagens rápidas entre garçom e cozinha.
+
+Notificação instantânea quando o pedido fica pronto.
+
+Histórico de mensagens e status.
+
+🔹 Pagamentos e Fechamento
+
+Dividir conta por pessoa, item ou valor.
+
+Pagamento múltiplo (Pix + Cartão + Dinheiro).
+
+Impressão da conta parcial ou total.
+
+Adição de gorjeta manual ou automática.
+
+🔥 2. MÓDULO DE COZINHA (KDS - Kitchen Display System)
+🔹 Painel de Produção
+
+Exibição em telas grandes ou tablets na cozinha.
+
+Pedidos ordenados por prioridade e tempo de espera.
+
+Itens agrupados por setor (ex: “Chapa”, “Saladas”, “Bebidas”).
+
+Cores indicativas:
+
+🟢 Novo
+
+🟡 Em preparo
+
+🔴 Atrasado
+
+⚪ Pronto
+
+🔹 Controle de Tempo
+
+Cronômetro automático por item e pedido.
+
+Alertas de tempo excedido.
+
+Estatísticas de tempo médio de preparo.
+
+🔹 Confirmação e Entrega
+
+Marcar item como “pronto”.
+
+O sistema notifica o garçom automaticamente.
+
+Opção de impressão de ticket ou uso de tela touchscreen.
+
+Histórico de pedidos concluídos.
+
+🔹 Prioridade Automática
+
+O sistema prioriza pratos que devem sair juntos.
+
+Balanceamento entre setores para evitar gargalos.
+
+🔹 Gestão de Produção
+
+Quantidade de pratos em preparo.
+
+Controle de fila e ordem de produção.
+
+Filtros por garçom, mesa, tipo de prato ou tempo.
+
+💰 3. MÓDULO DE PDV / CAIXA
+🔹 Controle de Vendas
+
+Registro de todos os pedidos (mesas, balcão e delivery).
+
+Vendas em tempo real.
+
+Reimpressão de comprovantes.
+
+Cancelamento com autenticação do gerente.
+
+🔹 Pagamentos
+
+Integração com máquinas de cartão e Pix.
+
+Pagamentos mistos (vários métodos por conta).
+
+Emissão de NFC-e / SAT / MFE / NF-e (conforme estado).
+
+Troco automático e fechamento de caixa.
+
+🔹 Relatórios de Caixa
+
+Fechamento diário automático.
+
+Registro de sangrias, suprimentos e despesas.
+
+Auditoria de cancelamentos.
+
+📦 4. MÓDULO DE ESTOQUE
+🔹 Controle de Ingredientes e Produtos
+
+Cadastro de insumos com unidade (kg, L, un).
+
+Ficha técnica de cada prato (baixa automática de ingredientes).
+
+Atualização automática ao registrar venda.
+
+🔹 Alertas e Previsão
+
+Aviso de estoque mínimo.
+
+Relatório de consumo por período.
+
+Sugestão de compra com base em vendas anteriores.
+
+🔹 Entrada e Saída
+
+Registro de compras e notas fiscais.
+
+Ajustes manuais com histórico.
+
+Controle por lote e validade.
+
+👨‍🍳 5. MÓDULO DE CARDÁPIO DIGITAL
+🔹 Interface Visual
+
+Cardápio com imagens, descrições, alérgenos e preços.
+
+Atualização em tempo real (sem precisar imprimir).
+
+Organização por categorias e combos.
+
+🔹 Customização
+
+Adicionais, complementos e modificadores configuráveis.
+
+Controle de disponibilidade (“acabou”, “em falta”).
+
+🔹 Integração
+
+Cardápio sincronizado com PDV, delivery e garçons.
+
+🏃 6. MÓDULO DE DELIVERY E RETIRADA
+🔹 Pedidos Online
+
+Integração com iFood, Rappi, WhatsApp, site próprio e app.
+
+Agrupamento de pedidos por plataforma.
+
+Notificações sonoras e visuais.
+
+🔹 Logística de Entrega
+
+Controle de entregadores e rotas.
+
+Status: “em preparo”, “saiu para entrega”, “entregue”.
+
+Histórico de entregas e taxas.
+
+🔹 Pagamento e Integração
+
+Recebimento de pedidos e atualização automática no PDV.
+
+Repasse de taxas e controle de comissão de apps.
+
+🧠 7. MÓDULO DE GESTÃO / ADMINISTRAÇÃO
+🔹 Dashboard Gerencial
+
+Painel com indicadores:
+
+Faturamento diário/mensal.
+
+Ticket médio.
+
+Tempo médio de atendimento.
+
+Produtos mais vendidos.
+
+🔹 Controle de Funcionários
+
+Cadastro de equipe com níveis de permissão.
+
+Controle de login/logoff e ações realizadas.
+
+Comissão de garçom por venda.
+
+🔹 Relatórios e BI
+
+Relatórios exportáveis (PDF, Excel).
+
+Gráficos de vendas, custos e margem.
+
+Comparativo de desempenho por período.
+
+🔹 Segurança e Auditoria
+
+Registro de todas as ações (log de sistema).
+
+Controle de acessos por função.
+
+Backup automático na nuvem.

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Modificadores de Produtos - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Dashboard
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2>Modificadores de Produtos</h2>
+            <p class="text-muted">Gerencie opções de personalização para os produtos</p>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newGroupModal">
+                + Novo Grupo de Modificadores
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if groups %}
+            {% for item in groups %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>{{ item.group.name }}</h5>
+                        {% if item.product %}
+                        <small class="text-muted">Produto: {{ item.product.name }}</small>
+                        {% else %}
+                        <small class="text-muted">Grupo global</small>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>Seleção:</strong> {{ item.group.min_selection }} - {{ item.group.max_selection }} opções
+                            {% if item.group.required %}<span class="badge bg-danger">Obrigatório</span>{% endif %}
+                        </p>
+                        
+                        <h6>Opções:</h6>
+                        <ul class="list-group">
+                            {% for option in item.options %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ option.name }}
+                                {% if option.price_adjustment != 0 %}
+                                <span class="badge bg-primary">
+                                    {% if option.price_adjustment > 0 %}+{% endif %}R$ {{ "%.2f"|format(option.price_adjustment) }}
+                                </span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        
+                        <button class="btn btn-sm btn-success mt-2" onclick="addOption({{ item.group.id }})">
+                            + Adicionar Opção
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Nenhum grupo de modificadores cadastrado. Crie o primeiro!
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="newGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin.add_modifier_group') }}">
+                <div class="modal-header">
+                    <h5 class="modal-title">Novo Grupo de Modificadores</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Grupo</label>
+                        <input type="text" class="form-control" name="name" placeholder="Ex: Ponto da Carne" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Produto (opcional)</label>
+                        <select class="form-select" name="product_id">
+                            <option value="">Aplicar a todos os produtos</option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <label class="form-label">Mín. Seleções</label>
+                            <input type="number" class="form-control" name="min_selection" value="0" min="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Máx. Seleções</label>
+                            <input type="number" class="form-control" name="max_selection" value="1" min="1">
+                        </div>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input type="checkbox" class="form-check-input" name="required" id="required">
+                        <label class="form-check-label" for="required">Obrigatório</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Grupo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function addOption(groupId) {
+    const name = prompt('Nome da opção:');
+    if (!name) return;
+    
+    const priceAdjustment = prompt('Ajuste de preço (0 para sem custo adicional):') || '0';
+    
+    fetch('{{ url_for("admin.add_modifier_option") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            group_id: groupId,
+            name: name,
+            price_adjustment: parseFloat(priceAdjustment)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+</script>
+{% endblock %}

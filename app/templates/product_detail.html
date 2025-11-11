@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} - Meatz Burger{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="mb-3">
+        <a href="{{ url_for('main.menu') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Cardápio
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{ product.image_url or 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600' }}" 
+                 alt="{{ product.name }}" 
+                 class="img-fluid rounded">
+        </div>
+        <div class="col-md-6">
+            <h1>{{ product.name }}</h1>
+            <p class="text-muted">{{ product.category.name if product.category else '' }}</p>
+            <p class="lead">{{ product.description }}</p>
+            <h3 class="text-primary">R$ {{ "%.2f"|format(product.price) }}</h3>
+            
+            <div class="mt-4">
+                <button class="btn btn-primary btn-lg" onclick="addToCart({{ product.id }})">
+                    <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    {% if related %}
+    <div class="mt-5">
+        <h3>Produtos Relacionados</h3>
+        <div class="row mt-3">
+            {% for item in related %}
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="{{ item.image_url or 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400' }}" 
+                         class="card-img-top" alt="{{ item.name }}">
+                    <div class="card-body">
+                        <h5>{{ item.name }}</h5>
+                        <p class="text-primary">R$ {{ "%.2f"|format(item.price) }}</p>
+                        <a href="{{ url_for('main.product_detail', id=item.id) }}" class="btn btn-sm btn-outline-primary">Ver Mais</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function addToCart(productId) {
+    fetch('/api/cart/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({product_id: productId, quantity: 1})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            alert('Produto adicionado ao carrinho!');
+            updateCartCount();
+        }
+    });
+}
+</script>
+{% endblock %}

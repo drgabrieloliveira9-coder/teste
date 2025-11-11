@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Auditoria - Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para Dashboard
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h2>Log de Auditoria</h2>
+            <p class="text-muted">Histórico completo de ações no sistema</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Data/Hora</th>
+                        <th>Usuário</th>
+                        <th>Ação</th>
+                        <th>Entidade</th>
+                        <th>ID</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td><small>{{ log.created_at }}</small></td>
+                        <td>{{ log.username or 'Sistema' }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ log.action }}</span>
+                        </td>
+                        <td>{{ log.entity_type }}</td>
+                        <td>{{ log.entity_id or '-' }}</td>
+                        <td><small>{{ log.ip_address or '-' }}</small></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

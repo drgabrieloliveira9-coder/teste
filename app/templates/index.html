@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(to top, rgba(106, 28, 11, 0.8), rgba(106, 28, 11, 0.5)), 
+                    url('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=1200&q=80') center/cover no-repeat;
+        padding: 8rem 0;
+        color: var(--white);
+    }
+    
+    .hero-content h1 {
+        font-size: 3.5rem;
+        font-weight: 900;
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+        text-shadow: 0 3px 10px rgba(0,0,0,0.5);
+        color: var(--white);
+    }
+    
+    .hero-content p {
+        font-size: 1.25rem;
+        max-width: 600px;
+        margin: 0 auto 2.5rem;
+        opacity: 0.9;
+    }
+
+    .section {
+        padding: 5rem 0;
+    }
+    .section-title {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .section-title h2 {
+        font-size: 2.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .section-title p {
+        color: var(--text-light);
+        max-width: 500px;
+        margin: 0.5rem auto 0;
+    }
+
+    .product-card {
+        text-align: center;
+    }
+    .product-card img {
+        height: 250px;
+        width: 100%;
+        object-fit: cover;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .product-card .product-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    .product-card .product-price {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .about-section {
+        background-color: var(--white);
+    }
+
+    .cta-section {
+        background: var(--dark-brown);
+        color: var(--white);
+        border-radius: 1.5rem;
+    }
+    .cta-section h2 {
+        color: var(--primary-color);
+    }
+
+    .review-card {
+        background-color: var(--white);
+        padding: 2rem;
+        border-radius: 1rem;
+        height: 100%;
+    }
+    .review-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .review-header img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 1rem;
+    }
+    .review-header h5 {
+        margin-bottom: 0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    .review-stars {
+        color: #FFD700;
+        margin-bottom: 1rem;
+    }
+    .review-card p {
+        font-size: 0.95rem;
+        color: var(--text-light);
+    }
+
+    .faq-accordion .accordion-item {
+        background-color: transparent;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .faq-accordion .accordion-button {
+        background-color: transparent;
+        color: var(--dark-brown);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    .faq-accordion .accordion-button:not(.collapsed) {
+        box-shadow: none;
+        color: var(--primary-hover);
+    }
+    .faq-accordion .accordion-button:focus {
+        box-shadow: none;
+    }
+    .faq-accordion .accordion-body {
+        color: var(--text-dark);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section { padding: 6rem 0; }
+        .hero-content h1 { font-size: 2.5rem; }
+        .hero-content p { font-size: 1.1rem; }
+        .section { padding: 3rem 0; }
+        .section-title h2 { font-size: 2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero-section text-center">
+    <div class="container">
+        <div class="hero-content">
+            <h1>O Simples da Melhor Forma.</h1>
+            <p>Hambúrgueres artesanais feitos com ingredientes frescos e muito sabor. Peça agora e experimente a diferença!</p>
+            <a href="{{ url_for('main.menu') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-utensils me-2"></i> Ver Cardápio
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Os Mais Pedidos</h2>
+            <p>Conheça os favoritos da galera que fazem o maior sucesso.</p>
+        </div>
+        <div class="row">
+            {% for product in products[:3] %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-body">
+                        <img src="{{ product.image_url or 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400' }}" 
+                             alt="{{ product.name }}" class="img-fluid">
+                        <h5 class="product-name">{{ product.name }}</h5>
+                        <div class="product-price">R$ {{ "%.2f"|format(product.price) }}</div>
+                        <form action="{{ url_for('main.add_product_to_cart', product_id=product.id) }}" method="POST">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i> Adicionar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section about-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&q=80" alt="Nossa Cozinha" class="img-fluid rounded-3 shadow-lg">
+            </div>
+            <div class="col-lg-6">
+                <h2 class="mb-3">Nossa História</h2>
+                <p class="text-secondary">O BurgerLoft nasceu em 2015 de uma necessidade que se tornou oportunidade. Com apenas uma opção de hambúrguer, conquistamos clientes fiéis com nossa simplicidade e qualidade.</p>
+                <p class="text-secondary">Hoje, somos uma rede com mais de 20 unidades, mas mantendo a essência: ingredientes de primeira, preparo artesanal e o lema de fazer "o simples da melhor forma".</p>
+                <a href="#" class="btn btn-outline-secondary mt-3">Saiba Mais</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-title">
+            <h2>O que nossos clientes dizem</h2>
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="Cliente 1">
+                        <div>
+                            <h5>Júlia M.</h5>
+                            <div class="review-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p>"Melhor hambúrguer da cidade, sem dúvidas! O pão é macio, a carne no ponto certo e o molho especial é incrível."</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="https://i.pravatar.cc/150?u=a042581f4e29026705d" alt="Cliente 2">
+                        <div>
+                            <h5>Carlos P.</h5>
+                            <div class="review-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p>"Atendimento rápido e o pedido chegou quentinho. A batata frita é super crocante. Virei cliente fiel!"</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="review-card">
+                    <div class="review-header">
+                        <img src="https://i.pravatar.cc/150?u=a042581f4e29026706d" alt="Cliente 3">
+                        <div>
+                            <h5>Ana L.</h5>
+                            <div class="review-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p>"Adorei a variedade do cardápio. O lanche é bem servido e o preço é justo. Recomendo a todos!"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section faq-section">
+    <div class="container">
+        <div class="section-title">
+            <h2>Perguntas Frequentes</h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion faq-accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Qual o horário de funcionamento?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                {{ site_settings.opening_hours or 'Funcionamos todos os dias, das 11:00 às 23:00.' }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Vocês aceitam quais formas de pagamento?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Aceitamos Pix, cartões de crédito e débito das principais bandeiras, e dinheiro.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Possuem opções vegetarianas?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Sim! Temos opções deliciosas sem carne. Procure pela categoria "Vegetarianos" em nosso cardápio.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section pt-0">
+    <div class="container">
+        <div class="cta-section p-5 text-center">
+            <h2 class="mb-3">Ficou com fome?</h2>
+            <p class="lead mb-4">Não passe vontade. Peça seu BurgerLoft agora mesmo!</p>
+            <a href="{{ url_for('main.menu') }}" class="btn btn-light btn-lg text-dark-brown">
+                Fazer meu Pedido <i class="fas fa-long-arrow-alt-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

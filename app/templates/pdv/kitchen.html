@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Cozinha - Meatz Burger{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('pdv.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para PDV
+        </a>
+    </div>
+    <h2>Cozinha - Pedidos Pendentes</h2>
+    <div class="row mt-4">
+        {% for order in orders %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header bg-warning">
+                    <h5>Pedido #{{ order.id }} - Mesa {{ order.table.number if order.table else 'N/A' }}</h5>
+                    <small>{{ order.created_at.strftime('%H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% for item in order.items %}
+                        <li>{{ item.quantity }}x {{ item.product.name }}</li>
+                        {% endfor %}
+                    </ul>
+                    <button class="btn btn-sm btn-success" onclick="updateStatus({{ order.id }}, 'pronto')">Pronto</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<script>
+function updateStatus(orderId, status) {
+    fetch(`/pdv/api/pedido/${orderId}/status`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({status: status})
+    }).then(() => location.reload());
+}
+</script>
+{% endblock %}

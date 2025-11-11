@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Categorias - Admin{% endblock %}
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">Gerenciar Categorias</h1>
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar
+            </a>
+            <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i> Adicionar Categoria
+            </a>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for category in categories %}
+        <div class="col-xl-3 col-lg-4 col-md-6">
+            <div class="card h-100">
+                <img src="{{ category.image_url or 'https://img-wrapper.vercel.app/image?url=https://placehold.co/600x400/fef8f2/6a1c0b?text=' ~ category.name }}" class="card-img-top" alt="{{ category.name }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ category.name }}</h5>
+                    <p class="card-text text-muted small">{{ category.description or 'Sem descrição.' }}</p>
+                </div>
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">{{ category.products|length }} produtos</span>
+                    <div>
+                        <!-- Ações como editar/deletar podem ser adicionadas aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <p class="text-muted">Nenhuma categoria encontrada.</p>
+                <a href="{{ url_for('admin.add_category') }}" class="btn btn-primary">Criar Primeira Categoria</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

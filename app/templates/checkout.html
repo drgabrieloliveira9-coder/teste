@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Finalizar Pedido - Meatz Burger{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-section {
+        padding: 4rem 0;
+    }
+    .order-type-card {
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid var(--border-color);
+        height: 100%;
+    }
+    .order-type-card:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    .order-type-card.selected {
+        border-color: var(--primary-color);
+        background-color: var(--background-cream);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+    .order-type-card input[type="radio"] {
+        display: none;
+    }
+    .order-type-icon {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    .summary-card {
+        position: sticky;
+        top: 100px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-section">
+    <div class="container">
+        <div class="mb-4">
+            <a href="{{ url_for('main.cart') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Voltar para Carrinho
+            </a>
+        </div>
+        
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <h1 class="mb-4">Finalizar Pedido</h1>
+                
+                {% if customer %}
+                <div class="alert alert-light border d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-user-check me-2 text-success"></i>
+                        Pedido para: <strong>{{ customer.name }}</strong> ({{ customer.phone }})
+                    </div>
+                    <a href="{{ url_for('auth.customer_logout') }}" class="btn btn-sm btn-outline-secondary">Trocar</a>
+                </div>
+                {% endif %}
+                
+                <form method="POST" id="checkoutForm">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="mb-3">1. Tipo de Pedido</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="order-type-card card" id="card-retirada">
+                                        <div class="card-body text-center">
+                                            <input type="radio" name="order_type" value="retirada" checked>
+                                            <div class="order-type-icon"><i class="fas fa-store-alt"></i></div>
+                                            <h6>Retirada no Local</h6>
+                                            <p class="text-muted small mb-0">Retire seu pedido na loja</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                {% if delivery_enabled %}
+                                <div class="col-md-6">
+                                    <label class="order-type-card card" id="card-entrega">
+                                        <div class="card-body text-center">
+                                            <input type="radio" name="order_type" value="entrega">
+                                            <div class="order-type-icon"><i class="fas fa-motorcycle"></i></div>
+                                            <h6>Entrega</h6>
+                                            <p class="text-muted small mb-0">Receba em casa</p>
+                                        </div>
+                                    </label>
+                                </div>
+                                {% else %}
+                                <div class="col-md-6">
+                                    <div class="card bg-light" style="opacity: 0.7;">
+                                        <div class="card-body text-center">
+                                            <div class="order-type-icon text-muted"><i class="fas fa-motorcycle"></i></div>
+                                            <h6 class="text-muted">Entrega</h6>
+                                            <p class="text-muted small mb-0">Indisponível</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="retirada-fields">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="mb-3">2. Informações de Retirada</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">Número da Mesa (opcional)</label>
+                                    <input type="number" class="form-control" name="table_number" placeholder="Ex: 5">
+                                    <small class="text-muted">Deixe em branco para retirada no balcão</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="entrega-fields" style="display: none;">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="mb-3">2. Endereço de Entrega</h5>
+                                <div class="row">
+                                    <div class="col-md-5 mb-3">
+                                        <label class="form-label">CEP</label>
+                                        <input type="text" class="form-control" name="zipcode" id="zipcode" placeholder="00000-000" value="{{ customer.zipcode if customer else '' }}">
+                                    </div>
+                                    <div class="col-md-7 mb-3">
+                                        <label class="form-label">Rua e Número</label>
+                                        <input type="text" class="form-control" name="address" id="address" placeholder="Ex: Av. Principal, 123" value="{{ customer.address if customer else '' }}">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Complemento e Bairro</label>
+                                    <input type="text" class="form-control" name="address_details" placeholder="Ex: Apto 4, Bairro Centro">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="mb-3">3. Pagamento e Observações</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Método de Pagamento</label>
+                                <select class="form-select" name="payment_method" required>
+                                    <option value="" selected disabled>Selecione...</option>
+                                    <option value="dinheiro">Dinheiro</option>
+                                    <option value="credito">Cartão de Crédito</option>
+                                    <option value="debito">Cartão de Débito</option>
+                                    <option value="pix">PIX</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Observações (opcional)</label>
+                                <textarea class="form-control" name="notes" rows="3" placeholder="Ex: sem cebola, ponto da carne mal passado, etc."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-check-circle me-2"></i> Confirmar Pedido
+                    </button>
+                </form>
+            </div>
+            
+            <div class="col-lg-5">
+                <div class="card summary-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Resumo do Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for item in items %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                            <strong>R$ {{ "%.2f"|format(item.subtotal) }}</strong>
+                        </div>
+                        {% endfor %}
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal</span>
+                            <span class="text-muted">R$ {{ "%.2f"|format(total) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2" id="delivery-fee-row" style="display: none;">
+                            <span class="text-muted">Taxa de Entrega</span>
+                            <span class="text-muted">R$ {{ "%.2f"|format(delivery_fee) }}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fs-5">
+                            <strong>Total:</strong>
+                            <strong id="total-value" class="text-primary-emphasis">R$ {{ "%.2f"|format(total) }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const orderTypeCards = document.querySelectorAll('.order-type-card');
+    const retiradaFields = document.getElementById('retirada-fields');
+    const entregaFields = document.getElementById('entrega-fields');
+    const deliveryFeeRow = document.getElementById('delivery-fee-row');
+    const totalValue = document.getElementById('total-value');
+    const zipcodeInput = document.getElementById('zipcode');
+    const addressInput = document.getElementById('address');
+    
+    const subtotal = parseFloat('{{ total }}');
+    const deliveryFee = parseFloat('{{ delivery_fee }}');
+    
+    function updateCheckoutView(type) {
+        if (type === 'retirada') {
+            retiradaFields.style.display = 'block';
+            entregaFields.style.display = 'none';
+            deliveryFeeRow.style.display = 'none';
+            totalValue.textContent = 'R$ ' + subtotal.toFixed(2).replace('.', ',');
+            zipcodeInput.removeAttribute('required');
+            addressInput.removeAttribute('required');
+        } else { // entrega
+            retiradaFields.style.display = 'none';
+            entregaFields.style.display = 'block';
+            deliveryFeeRow.style.display = 'flex';
+            totalValue.textContent = 'R$ ' + (subtotal + deliveryFee).toFixed(2).replace('.', ',');
+            zipcodeInput.setAttribute('required', 'required');
+            addressInput.setAttribute('required', 'required');
+        }
+    }
+
+    orderTypeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                orderTypeCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                updateCheckoutView(radio.value);
+            }
+        });
+    });
+    
+    // Initial setup
+    document.getElementById('card-retirada').click();
+    
+    zipcodeInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 5) {
+            value = value.substring(0, 5) + '-' + value.substring(5, 8);
+        }
+        e.target.value = value;
+    });
+});
+</script>
+{% endblock %}

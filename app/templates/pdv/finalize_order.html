@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Finalizar Pedido - PDV{% endblock %}
+{% block content %}
+<div class="container p-4">
+    <div class="mb-4">
+        <a href="{{ url_for('pdv.table_order', table_id=order.table_id) }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Voltar para Mesa
+        </a>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="h3 mb-0">Finalizar Pedido #{{ order.id }} (Mesa {{ order.table_id }})</h1>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h5>Resumo do Pedido</h5>
+                            <ul class="list-group list-group-flush">
+                                {% for item in order.items %}
+                                <li class="list-group-item d-flex justify-content-between px-0">
+                                    <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                                    <strong>R$ {{ "%.2f"|format(item.price * item.quantity) }}</strong>
+                                </li>
+                                {% endfor %}
+                                <li class="list-group-item d-flex justify-content-between px-0 fs-5">
+                                    <strong>Total:</strong>
+                                    <strong class="text-primary-emphasis">R$ {{ "%.2f"|format(order.total) }}</strong>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Pagamento</h5>
+                            <form method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label">Método de Pagamento</label>
+                                    <select class="form-select form-select-lg" name="payment_method" required>
+                                        <option value="dinheiro">Dinheiro</option>
+                                        <option value="credito">Cartão de Crédito</option>
+                                        <option value="debito">Cartão de Débito</option>
+                                        <option value="pix">PIX</option>
+                                    </select>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">Confirmar Pagamento</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

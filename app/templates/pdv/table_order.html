@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Mesa {{ table.number }} - PDV{% endblock %}
+{% block extra_css %}
+<style>
+    .product-grid-pdv {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .product-card-pdv {
+        cursor: pointer;
+        height: 100%;
+    }
+    .product-card-pdv .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+    .product-card-pdv h6 {
+        font-size: 1rem;
+    }
+    .order-summary {
+        position: sticky;
+        top: 100px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid p-4">
+    <div class="mb-4">
+        <a href="{{ url_for('pdv.floor_map') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Voltar para o Mapa
+        </a>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Adicionar Produtos à Mesa {{ table.number }}</h5>
+                </div>
+                <div class="card-body product-grid-pdv">
+                    <div class="row g-3">
+                        {% for product in products %}
+                        <div class="col-md-4 col-sm-6">
+                            <div class="card product-card-pdv" onclick="addProduct({{ product.id }})">
+                                <div class="card-body">
+                                    <h6>{{ product.name }}</h6>
+                                    <p class="text-muted small mb-0">R$ {{ "%.2f"|format(product.price) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card order-summary">
+                <div class="card-header">
+                    <h5 class="mb-0">Pedido Atual #{{ current_order.id if current_order else 'Novo' }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if current_order and current_order.items %}
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in current_order.items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                            <strong>R$ {{ "%.2f"|format(item.price * item.quantity) }}</strong>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center fs-5">
+                        <strong>Total:</strong>
+                        <strong class="text-primary-emphasis">R$ {{ "%.2f"|format(current_order.total) }}</strong>
+                    </div>
+                    <div class="d-grid mt-3">
+                        <a href="{{ url_for('pdv.finalize_order', order_id=current_order.id) }}" class="btn btn-success btn-lg">Finalizar Pedido</a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">Nenhum item adicionado ainda.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function addProduct(productId) {
+    const orderId = '{{ current_order.id if current_order else None }}';
+    let url, body;
+
+    if (orderId && orderId !== 'None') {
+        url = `/pdv/api/pedido/${orderId}/adicionar-item`;
+        body = { product_id: productId, quantity: 1 };
+    } else {
+        url = '/pdv/api/pedido/criar';
+        body = { table_id: {{ table.id }}, items: [{ product_id: productId, quantity: 1 }] };
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Erro ao adicionar produto.');
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Pedidos Delivery - PDV{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('pdv.index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Voltar para PDV
+        </a>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Pedidos Pendentes</h4>
+            {% for delivery in pending %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h6>Pedido #{{ delivery.order_id }}</h6>
+                    <p class="mb-0">
+                        <strong>Cliente:</strong> {{ delivery.customer_name }}<br>
+                        <strong>Telefone:</strong> {{ delivery.customer_phone }}<br>
+                        <strong>Endereço:</strong> {{ delivery.delivery_address }}<br>
+                        <strong>Total:</strong> R$ {{ "%.2f"|format(delivery.total + delivery.delivery_fee) }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-6">
+            <h4>Em Andamento</h4>
+            {% for delivery in in_progress %}
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h6>Pedido #{{ delivery.order_id }}</h6>
+                    <p class="mb-0">
+                        <strong>Cliente:</strong> {{ delivery.customer_name }}<br>
+                        <strong>Status:</strong> <span class="badge bg-warning">{{ delivery.status }}</span>
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Meatz Burger{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-page-container {
+        padding: 3rem 0;
+    }
+    .chat-window {
+        max-width: 800px;
+        margin: 0 auto;
+        border-radius: 1rem;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 70vh;
+    }
+    .chat-header {
+        background: var(--dark-brown);
+        color: white;
+        padding: 1rem 1.5rem;
+        text-align: center;
+    }
+    .chat-header h3 {
+        color: white;
+        margin: 0;
+        font-size: 1.25rem;
+    }
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #f4f7f6;
+    }
+    .message {
+        margin-bottom: 1.5rem;
+        display: flex;
+        max-width: 80%;
+    }
+    .message.user {
+        margin-left: auto;
+        flex-direction: row-reverse;
+    }
+    .message-bubble {
+        padding: 0.75rem 1.25rem;
+        border-radius: 1.25rem;
+    }
+    .message.user .message-bubble {
+        background: var(--primary-color);
+        color: white;
+        border-bottom-right-radius: 0.25rem;
+    }
+    .message.bot .message-bubble {
+        background: var(--white);
+        color: var(--text-dark);
+        border-bottom-left-radius: 0.25rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .chat-input {
+        padding: 1rem 1.5rem;
+        background: var(--white);
+        border-top: 1px solid var(--border-color);
+    }
+    .chat-input .form-control {
+        border-right: 0;
+        border-radius: 50px 0 0 50px;
+    }
+    .chat-input .btn {
+        border-radius: 0 50px 50px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-page-container">
+    <div class="container">
+        <div class="card chat-window">
+            <div class="chat-header">
+                <h3><i class="fas fa-robot me-2"></i> Assistente Virtual</h3>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot">
+                    <div class="message-bubble">
+                        Olá! Bem-vindo ao Meatz Burger! Como posso ajudar você hoje? 🍔
+                    </div>
+                </div>
+            </div>
+            <div class="chat-input">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="messageInput" placeholder="Digite sua mensagem...">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function sendMessage() {
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    if(!message) return;
+    
+    const messagesDiv = document.getElementById('chatMessages');
+    
+    // Add user message
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.className = 'message user';
+    userMessageDiv.innerHTML = `<div class="message-bubble">${message}</div>`;
+    messagesDiv.appendChild(userMessageDiv);
+    
+    input.value = '';
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    
+    // Add typing indicator
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message bot';
+    typingDiv.innerHTML = `<div class="message-bubble"><em>Digitando...</em></div>`;
+    messagesDiv.appendChild(typingDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+    fetch('/chatbot/api/mensagem', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: message})
+    })
+    .then(r => r.json())
+    .then(data => {
+        typingDiv.remove(); // Remove typing indicator
+        const botMessageDiv = document.createElement('div');
+        botMessageDiv.className = 'message bot';
+        if(data.success) {
+            botMessageDiv.innerHTML = `<div class="message-bubble">${data.response}</div>`;
+        } else {
+            botMessageDiv.innerHTML = `<div class="message-bubble">Desculpe, ocorreu um erro. Configure a GEMINI_API_KEY para ativar o chatbot.</div>`;
+        }
+        messagesDiv.appendChild(botMessageDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    })
+    .catch(() => {
+        typingDiv.remove();
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'message bot';
+        errorDiv.innerHTML = `<div class="message-bubble">Não foi possível conectar ao assistente. Tente novamente mais tarde.</div>`;
+        messagesDiv.appendChild(errorDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+}
+
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,334 @@
+{% extends "base.html" %}
+{% block title %}KDS - Sistema de Cozinha{% endblock %}
+{% block extra_css %}
+<style>
+    body {
+        background: #1a1a1a;
+        color: #ffffff;
+    }
+    main {
+        background: #1a1a1a;
+    }
+    .kds-container {
+        padding: 1rem;
+        max-width: 100%;
+    }
+    .kds-header {
+        background: #2a2a2a;
+        padding: 1rem 1.5rem;
+        border-radius: 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    .kds-header h1 {
+        margin: 0;
+        color: white;
+        font-weight: 700;
+        font-size: 1.5rem;
+    }
+    .kds-stats {
+        display: flex;
+        gap: 1rem;
+    }
+    .stat-badge {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .kds-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .order-card {
+        background: #333;
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        border-left: 5px solid;
+        transition: all 0.3s ease;
+        animation: slideIn 0.5s ease-out;
+        display: flex;
+        flex-direction: column;
+    }
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .order-card.priority-low { border-left-color: #4facfe; }
+    .order-card.priority-medium { border-left-color: #f2c94c; }
+    .order-card.priority-high { border-left-color: #f2994a; }
+    .order-card.priority-critical { 
+        border-left-color: #eb3349;
+        animation: pulse 1.5s infinite, slideIn 0.5s ease-out;
+    }
+    @keyframes pulse {
+        50% { box-shadow: 0 0 15px rgba(235, 51, 73, 0.5); }
+    }
+    
+    .order-header {
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #444;
+    }
+    .order-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+    .order-time {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+    .order-info {
+        color: #aaa;
+        font-size: 0.9rem;
+        padding: 0.5rem 1.5rem;
+    }
+    
+    .order-items {
+        padding: 0 1.5rem;
+        flex-grow: 1;
+    }
+    .order-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #444;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .order-item:last-child { border-bottom: none; }
+
+    .item-name { font-weight: 600; font-size: 1.1rem; }
+    .item-quantity { color: var(--primary-color); font-weight: 700; margin-right: 0.5rem; }
+    .item-notes { color: #f2c94c; font-size: 0.85rem; font-style: italic; }
+    
+    .item-status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        cursor: pointer;
+    }
+    .status-novo { background: #4facfe; color: white; }
+    .status-preparando { background: #f2994a; color: white; }
+    .status-pronto { background: #56ab2f; color: white; }
+    
+    .order-actions {
+        padding: 1rem 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+    }
+    .btn-kds {
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    .btn-start { background: #f2994a; color: white; }
+    .btn-ready { background: #56ab2f; color: white; }
+    .btn-deliver { background: #667eea; color: white; grid-column: 1 / -1; }
+    
+    .empty-column {
+        text-align: center;
+        padding: 5rem 2rem;
+        color: #666;
+        border: 2px dashed #444;
+        border-radius: 1rem;
+    }
+
+    .column-title {
+        color: white;
+        font-weight: 700;
+        font-size: 1.2rem;
+        text-align: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+    }
+    .column-new .column-title { background: #4facfe; }
+    .column-preparing .column-title { background: #f2994a; }
+    .column-ready .column-title { background: #56ab2f; }
+
+    #newOrderSound { display: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="kds-container">
+    <div class="kds-header d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-tv"></i> KDS</h1>
+        <div class="kds-stats">
+            <div class="stat-badge"><i class="fas fa-clock me-2"></i><span id="current-time"></span></div>
+            <a href="{{ url_for('pdv.index') }}" class="btn btn-sm btn-outline-light">Sair do KDS</a>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Coluna: Novos Pedidos -->
+        <div class="col-lg-4 column-new">
+            <h2 class="column-title"><i class="fas fa-plus-circle me-2"></i>NOVOS ({{ new_orders|length }})</h2>
+            <div class="orders-container">
+                {% for data in new_orders %}
+                <div class="order-card priority-{{ data.priority_class }}" data-order-id="{{ data.order.id }}">
+                    <div class="order-header">
+                        <div class="order-number">#{{ data.order.id }}</div>
+                        <div class="order-time">{{ data.age_minutes }}min</div>
+                    </div>
+                    <div class="order-info">
+                        {% if data.order.table_id %}<i class="fas fa-table"></i> Mesa {{ data.order.table_id }}{% else %}<i class="fas fa-shopping-bag"></i> Retirada/Entrega{% endif %}
+                    </div>
+                    <div class="order-items">
+                        {% for item in data.items %}
+                        <div class="order-item">
+                            <div>
+                                <div class="item-name"><span class="item-quantity">{{ item.quantity }}x</span> {{ item.product_name }}</div>
+                                {% if item.notes %}<div class="item-notes"><i class="fas fa-sticky-note me-1"></i>{{ item.notes }}</div>{% endif %}
+                            </div>
+                            <span class="item-status-badge status-{{ item.status }}" onclick="updateItemStatus({{ item.id }}, 'preparando')">{{ item.status }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn-kds btn-start" onclick="updateOrderStatus({{ data.order.id }}, 'preparando')" style="grid-column: 1 / -1;">
+                            <i class="fas fa-play me-1"></i> Iniciar Preparo
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-column"><i class="fas fa-inbox fa-2x mb-3"></i><p>Nenhum pedido novo</p></div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Coluna: Preparando -->
+        <div class="col-lg-4 column-preparing">
+            <h2 class="column-title"><i class="fas fa-fire me-2"></i>PREPARANDO ({{ preparing_orders|length }})</h2>
+            <div class="orders-container">
+                {% for data in preparing_orders %}
+                <div class="order-card priority-{{ data.priority_class }}" data-order-id="{{ data.order.id }}">
+                    <div class="order-header">
+                        <div class="order-number">#{{ data.order.id }}</div>
+                        <div class="order-time">{{ data.age_minutes }}min</div>
+                    </div>
+                    <div class="order-info">
+                        {% if data.order.table_id %}<i class="fas fa-table"></i> Mesa {{ data.order.table_id }}{% else %}<i class="fas fa-shopping-bag"></i> Retirada/Entrega{% endif %}
+                    </div>
+                    <div class="order-items">
+                        {% for item in data.items %}
+                        <div class="order-item">
+                            <div>
+                                <div class="item-name"><span class="item-quantity">{{ item.quantity }}x</span> {{ item.product_name }}</div>
+                                {% if item.notes %}<div class="item-notes"><i class="fas fa-sticky-note me-1"></i>{{ item.notes }}</div>{% endif %}
+                            </div>
+                            <span class="item-status-badge status-{{ item.status }}" onclick="updateItemStatus({{ item.id }}, 'pronto')">{{ item.status }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn-kds btn-ready" onclick="updateOrderStatus({{ data.order.id }}, 'pronto')" style="grid-column: 1 / -1;">
+                            <i class="fas fa-check me-1"></i> Marcar como Pronto
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-column"><i class="fas fa-fire fa-2x mb-3"></i><p>Nenhum pedido em preparação</p></div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Coluna: Prontos -->
+        <div class="col-lg-4 column-ready">
+            <h2 class="column-title"><i class="fas fa-check-circle me-2"></i>PRONTOS ({{ ready_orders|length }})</h2>
+            <div class="orders-container">
+                {% for data in ready_orders %}
+                <div class="order-card priority-{{ data.priority_class }}" data-order-id="{{ data.order.id }}">
+                    <div class="order-header">
+                        <div class="order-number">#{{ data.order.id }}</div>
+                        <div class="order-time">{{ data.age_minutes }}min</div>
+                    </div>
+                    <div class="order-info">
+                        {% if data.order.table_id %}<i class="fas fa-table"></i> Mesa {{ data.order.table_id }}{% else %}<i class="fas fa-shopping-bag"></i> Retirada/Entrega{% endif %}
+                    </div>
+                    <div class="order-items">
+                        {% for item in data.items %}
+                        <div class="order-item">
+                            <div class="item-name"><span class="item-quantity">{{ item.quantity }}x</span> {{ item.product_name }}</div>
+                            <span class="item-status-badge status-{{ item.status }}">{{ item.status }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="order-actions">
+                        <button class="btn-kds btn-deliver" onclick="updateOrderStatus({{ data.order.id }}, 'entregue')">
+                            <i class="fas fa-hand-holding me-1"></i> Entregar / Finalizar
+                        </button>
+                    </div>
+                </div>
+                {% else %}
+                <div class="empty-column"><i class="fas fa-check-circle fa-2x mb-3"></i><p>Nenhum pedido pronto</p></div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<audio id="newOrderSound" src="https://cdn.jsdelivr.net/gh/redstapler/purr-meow/purr.mp3" preload="auto"></audio>
+
+<script>
+let lastOrderCount = {{ new_orders|length + preparing_orders|length + ready_orders|length }};
+
+function updateClock() {
+    document.getElementById('current-time').textContent = new Date().toLocaleTimeString('pt-BR');
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+function updateOrderStatus(orderId, newStatus) {
+    fetch(`/pdv/api/pedido/${orderId}/status`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ status: newStatus })
+    }).then(() => location.reload());
+}
+
+function updateItemStatus(itemId, newStatus) {
+    fetch(`/pdv/api/item/${itemId}/status`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ status: newStatus })
+    }).then(() => location.reload());
+}
+
+function checkForUpdates() {
+    fetch('{{ url_for("pdv.kds_api") }}')
+    .then(response => response.json())
+    .then(data => {
+        const currentOrderCount = data.new.length + data.preparing.length + data.ready.length;
+        if (currentOrderCount > lastOrderCount) {
+            document.getElementById('newOrderSound').play().catch(e => console.log("Autoplay blocked"));
+        }
+        if (JSON.stringify(data) !== sessionStorage.getItem('kds_data')) {
+            sessionStorage.setItem('kds_data', JSON.stringify(data));
+            location.reload();
+        }
+        lastOrderCount = currentOrderCount;
+    });
+}
+
+// Store initial data to compare against
+fetch('{{ url_for("pdv.kds_api") }}')
+    .then(r => r.json())
+    .then(data => sessionStorage.setItem('kds_data', JSON.stringify(data)));
+
+setInterval(checkForUpdates, 5000); // Check for updates every 5 seconds
+</script>
+{% endblock %}
